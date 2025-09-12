@@ -1,6 +1,6 @@
 // البيانات: الصفوف → المواد → المواعيد
 const schedules = {
-  primary: {
+  primary2: {
     "ICT": ["السبت - 4 إلى 5"],
     "Math": ["الأحد - 1 إلى 2"]
   },
@@ -93,5 +93,6 @@ function showSubjectSchedule(className, subject) {
 function closePopup() {
   document.getElementById('popup').style.display = "none";
 }
+
 
 
