@@ -8,13 +8,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 <body class="bg-fixed bg-cover bg-center text-gray-900" style="background-image: url('bg.jpg');">
+  
   <!-- العنوان -->
-  <h1 class="text-3xl font-bold text-indigo-700 mb-6 animate__animated animate__fadeInDown">
-    📘 نظام متابعة الطلاب
-  </h1>
+  <div class="bg-white shadow-lg rounded-2xl p-4 w-full max-w-md mx-auto text-center mb-6 animate__animated animate__fadeInDown">
+    <h1 class="text-3xl font-bold text-indigo-700">📘 نظام متابعة الطلاب</h1>
+  </div>
 
   <!-- البحث -->
-  <div class="bg-white shadow-lg rounded-2xl p-4 w-full max-w-md mb-6 animate__animated animate__fadeInUp">
+  <div class="bg-white shadow-lg rounded-2xl p-4 w-full max-w-md mx-auto mb-6 animate__animated animate__fadeInUp">
     <label for="studentCode" class="block mb-2 text-lg font-semibold text-gray-700">ادخل كود الطالب:</label>
     <input id="studentCode" type="text" 
       class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none mb-3">
@@ -25,24 +26,26 @@
   </div>
 
   <!-- بيانات الطالب -->
-  <div id="studentInfo" class="w-full max-w-2xl bg-white shadow-md rounded-2xl p-4 animate__animated animate__fadeIn"></div>
+  <div id="studentInfo" class="w-full max-w-2xl bg-white shadow-md rounded-2xl p-4 mx-auto animate__animated animate__fadeIn"></div>
 
   <!-- الفيديوهات -->
-  <h2 class="text-xl font-bold text-indigo-700 mt-8 mb-4">🎬 الفيديوهات</h2>
-  <div id="videos" class="grid gap-3 w-full max-w-2xl"></div>
+  <div class="bg-white shadow-lg rounded-2xl p-4 w-full max-w-md mx-auto text-center mt-8 mb-4">
+    <h2 class="text-xl font-bold text-indigo-700">🎬 الفيديوهات</h2>
+  </div>
+  <div id="videos" class="grid gap-3 w-full max-w-2xl mx-auto"></div>
 
   <!-- وسائل التواصل -->
-  <h2 class="text-xl font-bold text-indigo-700 mt-8 mb-4">📞 وسائل التواصل</h2>
-  <div id="contacts" class="grid gap-3 w-full max-w-2xl"></div>
+  <div class="bg-white shadow-lg rounded-2xl p-4 w-full max-w-md mx-auto text-center mt-8 mb-4">
+    <h2 class="text-xl font-bold text-indigo-700">📞 وسائل التواصل</h2>
+  </div>
+  <div id="contacts" class="grid gap-3 w-full max-w-2xl mx-auto"></div>
 
   <script>
-    // روابط الشيتات (CSV) — استبدلها باللينكات عندك
+    // روابط الشيتات
     const SHEET_STUDENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=635336311&single=true&output=csv";
     const SHEET_VIDEOS   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=849351073&single=true&output=csv";
     const SHEET_CONTACTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=218257892&single=true&output=csv";
 
-
-    // دالة قراءة CSV (بسيطة، تعتمد على فاصل komma)
     async function fetchCSV(url) {
       const res = await fetch(url);
       const text = await res.text();
@@ -55,12 +58,10 @@
       });
     }
 
-    // حماية للأرقام الفارغة
     function safeNumber(val) {
       return (val === "" || isNaN(parseFloat(val))) ? 0 : parseFloat(val);
     }
 
-    // البحث عن الطالب
     async function searchStudent() {
       const code = document.getElementById("studentCode").value.trim();
       if (!code) {
@@ -77,7 +78,6 @@
         return;
       }
 
-      // درجات (شوف إن أسماء الأعمدة في الشيت مطابقة للحروف الصغيرة)
       const w1_exam = safeNumber(student.w1_exam);
       const w1_homework = safeNumber(student.w1_homework);
       const w1_tesmie3 = safeNumber(student.w1_tesmie3);
@@ -96,20 +96,16 @@
 
       const finalExam = safeNumber(student.finalExam);
 
-      // حساب المجموع (كل امتحان 10، كل واجب 10، كل تسميع 10، الشامل 20)
       const total = w1_exam + w1_homework + w1_tesmie3 +
                     w2_exam + w2_homework + w2_tesmie3 +
                     w3_exam + w3_homework + w3_tesmie3 +
                     w4_exam + w4_homework + w4_tesmie3 +
                     finalExam;
 
-      const maxTotal = (4 * 10) + (4 * 10) + (4 * 10) + 20; // 140
+      const maxTotal = (4 * 10) + (4 * 10) + (4 * 10) + 20;
       const percent = ((total / maxTotal) * 100).toFixed(2);
-
-      // لون النسبة حسب الأداء (خيار جمالي)
       const percentClass = percent >= 75 ? "text-green-700" : percent >= 50 ? "text-yellow-700" : "text-red-700";
 
-      // عرض
       document.getElementById("studentInfo").innerHTML = `
         <h2 class="text-2xl font-bold text-indigo-700 mb-4">📄 بيانات الطالب</h2>
         <p><strong>الاسم:</strong> ${student.name || "-"}</p>
@@ -142,7 +138,6 @@
       `;
     }
 
-    // عرض الفيديوهات
     async function loadVideos() {
       const videos = await fetchCSV(SHEET_VIDEOS);
       const container = document.getElementById("videos");
@@ -155,7 +150,6 @@
       `).join("");
     }
 
-    // عرض التواصل
     async function loadContacts() {
       const contacts = await fetchCSV(SHEET_CONTACTS);
       const container = document.getElementById("contacts");
@@ -170,7 +164,6 @@
       }).join("");
     }
 
-    // تشغيل عند الفتح
     loadVideos();
     loadContacts();
   </script>
