@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام متابعة الطلاب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center p-4">
+
+  <!-- العنوان -->
+  <h1 class="text-3xl font-bold text-indigo-700 mb-6 animate__animated animate__fadeInDown">
+    📘 نظام متابعة الطلاب
+  </h1>
+
+  <!-- البحث -->
+  <div class="bg-white shadow-lg rounded-2xl p-4 w-full max-w-md mb-6 animate__animated animate__fadeInUp">
+    <label for="studentCode" class="block mb-2 text-lg font-semibold text-gray-700">ادخل كود الطالب:</label>
+    <input id="studentCode" type="text" 
+      class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none mb-3">
+    <button onclick="searchStudent()" 
+      class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+      🔍 بحث
+    </button>
+  </div>
+
+  <!-- بيانات الطالب -->
+  <div id="studentInfo" class="w-full max-w-2xl bg-white shadow-md rounded-2xl p-4 animate__animated animate__fadeIn"></div>
+
+  <!-- الفيديوهات -->
+  <h2 class="text-xl font-bold text-indigo-700 mt-8 mb-4">🎬 الفيديوهات</h2>
+  <div id="videos" class="grid gap-3 w-full max-w-2xl"></div>
+
+  <!-- وسائل التواصل -->
+  <h2 class="text-xl font-bold text-indigo-700 mt-8 mb-4">📞 وسائل التواصل</h2>
+  <div id="contacts" class="grid gap-3 w-full max-w-2xl"></div>
+
+  <script>
+    // روابط الشيتات (CSV)
+    const SHEET_STUDENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=635336311&single=true&output=csv";
+    const SHEET_VIDEOS   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=849351073&single=true&output=csv";
+    const SHEET_CONTACTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=218257892&single=true&output=csv";
+
+    // دالة قراءة CSV
+    async function fetchCSV(url) {
+      let res = await fetch(url);
+      let text = await res.text();
+      const rows = text.split("\n").map(r => r.split(","));
+      const headers = rows[0].map(h => h.trim());
+      return rows.slice(1).map(row => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h] = row[i] ? row[i].trim() : "");
+        return obj;
+      });
+    }
+
+    // حماية للأرقام الفارغة
+    function safeNumber(val) {
+      return isNaN(parseFloat(val)) ? 0 : parseFloat(val);
+    }
+
+    // البحث عن الطالب
+    async function searchStudent() {
+      const code = document.getElementById("studentCode").value.trim();
+      const students = await fetchCSV(SHEET_STUDENTS);
+      let student = students.find(s => s.code === code);
+
+      if (!student) {
+        document.getElementById("studentInfo").innerHTML =
+          `<p class="text-red-600 font-bold">⚠️ الطالب غير موجود</p>`;
+        return;
+      }
+
+      // درجات
+      let w1_exam = safeNumber(student.w1_exam);
+      let w1_homework = safeNumber(student.w1_homework);
+      let w2_exam = safeNumber(student.w2_exam);
+      let w2_homework = safeNumber(student.w2_homework);
+      let w3_exam = safeNumber(student.w3_exam);
+      let w3_homework = safeNumber(student.w3_homework);
+      let w4_exam = safeNumber(student.w4_exam);
+      let w4_homework = safeNumber(student.w4_homework);
+      let finalExam = safeNumber(student.finalExam);
+
+      // الحساب
+      let total = w1_exam + w2_exam + w3_exam + w4_exam +
+                  w1_homework + w2_homework + w3_homework + w4_homework +
+                  finalExam;
+      let maxTotal = (4*10) + (4*10) + 20; // 100
+      let percent = ((total / maxTotal) * 100).toFixed(2);
+
+      // عرض البيانات
+      document.getElementById("studentInfo").innerHTML = `
+        <h2 class="text-2xl font-bold text-indigo-700 mb-4">📄 بيانات الطالب</h2>
+        <p><strong>الاسم:</strong> ${student.name}</p>
+        <p><strong>الصف:</strong> ${student.class}</p>
+        <p><strong>المجموعة:</strong> ${student.group}</p>
+
+        <h3 class="text-xl font-semibold text-gray-700 mt-4 mb-2">📊 التقييم</h3>
+        <table class="w-full border border-gray-300 rounded-lg overflow-hidden text-center">
+          <thead class="bg-indigo-600 text-white">
+            <tr>
+              <th class="p-2">الأسبوع</th>
+              <th class="p-2">امتحان (10)</th>
+              <th class="p-2">واجب (10)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b"><td>1</td><td>${w1_exam}</td><td>${w1_homework}</td></tr>
+            <tr class="border-b bg-gray-50"><td>2</td><td>${w2_exam}</td><td>${w2_homework}</td></tr>
+            <tr class="border-b"><td>3</td><td>${w3_exam}</td><td>${w3_homework}</td></tr>
+            <tr class="border-b bg-gray-50"><td>4</td><td>${w4_exam}</td><td>${w4_homework}</td></tr>
+          </tbody>
+        </table>
+
+        <p class="mt-4 font-semibold">الامتحان الشامل: <span class="text-indigo-700">${finalExam}/20</span></p>
+        <p class="mt-2 font-bold text-green-600">النسبة النهائية: ${percent}%</p>
+      `;
+    }
+
+    // عرض الفيديوهات
+    async function loadVideos() {
+      const videos = await fetchCSV(SHEET_VIDEOS);
+      const container = document.getElementById("videos");
+      container.innerHTML = videos.map(v => `
+        <div class="bg-white shadow rounded-lg p-3 border hover:bg-indigo-50 transition">
+          <p class="font-semibold text-indigo-700">${v.title}</p>
+          <p class="text-sm text-gray-600">${v.note}</p>
+          <a href="${v.link}" target="_blank" class="text-blue-600 underline">مشاهدة</a>
+        </div>
+      `).join("");
+    }
+
+    // عرض التواصل
+    async function loadContacts() {
+      const contacts = await fetchCSV(SHEET_CONTACTS);
+      const container = document.getElementById("contacts");
+      container.innerHTML = contacts.map(c => {
+        let link = c.type === "whatsapp" ? `https://wa.me/${c.number}` : `tel:${c.number}`;
+        return `
+          <div class="bg-white shadow rounded-lg p-3 border hover:bg-green-50 transition">
+            <p class="font-semibold">${c.label}</p>
+            <a href="${link}" target="_blank" class="text-green-600 underline">اتصال</a>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // تشغيل عند الفتح
+    loadVideos();
+    loadContacts();
+  </script>
+</body>
+</html>
