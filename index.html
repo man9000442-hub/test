@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام متابعة الطلاب</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,16 +37,17 @@
   <div id="contacts" class="grid gap-3 w-full max-w-2xl"></div>
 
   <script>
-    // روابط الشيتات (CSV)
+    // روابط الشيتات (CSV) — استبدلها باللينكات عندك
     const SHEET_STUDENTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=635336311&single=true&output=csv";
     const SHEET_VIDEOS   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=849351073&single=true&output=csv";
     const SHEET_CONTACTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRj2ajSLPIBsAwHwv8qSVX7_5q5I_LATlqKEWkzOIdF_3Em9PmTTWZ8BnXNau0yCNeF1XAx9KX3PLrN/pub?gid=218257892&single=true&output=csv";
 
-    // دالة قراءة CSV
+
+    // دالة قراءة CSV (بسيطة، تعتمد على فاصل komma)
     async function fetchCSV(url) {
-      let res = await fetch(url);
-      let text = await res.text();
-      const rows = text.split("\n").map(r => r.split(","));
+      const res = await fetch(url);
+      const text = await res.text();
+      const rows = text.trim().split("\n").map(r => r.split(","));
       const headers = rows[0].map(h => h.trim());
       return rows.slice(1).map(row => {
         let obj = {};
@@ -57,14 +58,19 @@
 
     // حماية للأرقام الفارغة
     function safeNumber(val) {
-      return isNaN(parseFloat(val)) ? 0 : parseFloat(val);
+      return (val === "" || isNaN(parseFloat(val))) ? 0 : parseFloat(val);
     }
 
     // البحث عن الطالب
     async function searchStudent() {
       const code = document.getElementById("studentCode").value.trim();
+      if (!code) {
+        document.getElementById("studentInfo").innerHTML = `<p class="text-red-600 font-bold">اكتب كود الطالب</p>`;
+        return;
+      }
+
       const students = await fetchCSV(SHEET_STUDENTS);
-      let student = students.find(s => s.code === code);
+      const student = students.find(s => (s.code || "") === code);
 
       if (!student) {
         document.getElementById("studentInfo").innerHTML =
@@ -72,50 +78,68 @@
         return;
       }
 
-      // درجات
-      let w1_exam = safeNumber(student.w1_exam);
-      let w1_homework = safeNumber(student.w1_homework);
-      let w2_exam = safeNumber(student.w2_exam);
-      let w2_homework = safeNumber(student.w2_homework);
-      let w3_exam = safeNumber(student.w3_exam);
-      let w3_homework = safeNumber(student.w3_homework);
-      let w4_exam = safeNumber(student.w4_exam);
-      let w4_homework = safeNumber(student.w4_homework);
-      let finalExam = safeNumber(student.finalExam);
+      // درجات (شوف إن أسماء الأعمدة في الشيت مطابقة للحروف الصغيرة)
+      const w1_exam = safeNumber(student.w1_exam);
+      const w1_homework = safeNumber(student.w1_homework);
+      const w1_tesmie3 = safeNumber(student.w1_tesmie3);
 
-      // الحساب
-      let total = w1_exam + w2_exam + w3_exam + w4_exam +
-                  w1_homework + w2_homework + w3_homework + w4_homework +
-                  finalExam;
-      let maxTotal = (4*10) + (4*10) + 20; // 100
-      let percent = ((total / maxTotal) * 100).toFixed(2);
+      const w2_exam = safeNumber(student.w2_exam);
+      const w2_homework = safeNumber(student.w2_homework);
+      const w2_tesmie3 = safeNumber(student.w2_tesmie3);
 
-      // عرض البيانات
+      const w3_exam = safeNumber(student.w3_exam);
+      const w3_homework = safeNumber(student.w3_homework);
+      const w3_tesmie3 = safeNumber(student.w3_tesmie3);
+
+      const w4_exam = safeNumber(student.w4_exam);
+      const w4_homework = safeNumber(student.w4_homework);
+      const w4_tesmie3 = safeNumber(student.w4_tesmie3);
+
+      const finalExam = safeNumber(student.finalExam);
+
+      // حساب المجموع (كل امتحان 10، كل واجب 10، كل تسميع 10، الشامل 20)
+      const total = w1_exam + w1_homework + w1_tesmie3 +
+                    w2_exam + w2_homework + w2_tesmie3 +
+                    w3_exam + w3_homework + w3_tesmie3 +
+                    w4_exam + w4_homework + w4_tesmie3 +
+                    finalExam;
+
+      const maxTotal = (4 * 10) + (4 * 10) + (4 * 10) + 20; // 140
+      const percent = ((total / maxTotal) * 100).toFixed(2);
+
+      // لون النسبة حسب الأداء (خيار جمالي)
+      const percentClass = percent >= 75 ? "text-green-700" : percent >= 50 ? "text-yellow-700" : "text-red-700";
+
+      // عرض
       document.getElementById("studentInfo").innerHTML = `
         <h2 class="text-2xl font-bold text-indigo-700 mb-4">📄 بيانات الطالب</h2>
-        <p><strong>الاسم:</strong> ${student.name}</p>
-        <p><strong>الصف:</strong> ${student.class}</p>
-        <p><strong>المجموعة:</strong> ${student.group}</p>
+        <p><strong>الاسم:</strong> ${student.name || "-"}</p>
+        <p><strong>الصف:</strong> ${student.class || "-"}</p>
+        <p><strong>المجموعة:</strong> ${student.group || "-"}</p>
 
         <h3 class="text-xl font-semibold text-gray-700 mt-4 mb-2">📊 التقييم</h3>
-        <table class="w-full border border-gray-300 rounded-lg overflow-hidden text-center">
-          <thead class="bg-indigo-600 text-white">
-            <tr>
-              <th class="p-2">الأسبوع</th>
-              <th class="p-2">امتحان (10)</th>
-              <th class="p-2">واجب (10)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b"><td>1</td><td>${w1_exam}</td><td>${w1_homework}</td></tr>
-            <tr class="border-b bg-gray-50"><td>2</td><td>${w2_exam}</td><td>${w2_homework}</td></tr>
-            <tr class="border-b"><td>3</td><td>${w3_exam}</td><td>${w3_homework}</td></tr>
-            <tr class="border-b bg-gray-50"><td>4</td><td>${w4_exam}</td><td>${w4_homework}</td></tr>
-          </tbody>
-        </table>
+
+        <div class="overflow-x-auto">
+          <table class="w-full border border-gray-300 rounded-lg overflow-hidden text-center">
+            <thead class="bg-indigo-600 text-white">
+              <tr>
+                <th class="p-2">الأسبوع</th>
+                <th class="p-2">امتحان (10)</th>
+                <th class="p-2">واجب (10)</th>
+                <th class="p-2">تسميع (10)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b"><td>1</td><td>${w1_exam}</td><td>${w1_homework}</td><td>${w1_tesmie3}</td></tr>
+              <tr class="border-b bg-gray-50"><td>2</td><td>${w2_exam}</td><td>${w2_homework}</td><td>${w2_tesmie3}</td></tr>
+              <tr class="border-b"><td>3</td><td>${w3_exam}</td><td>${w3_homework}</td><td>${w3_tesmie3}</td></tr>
+              <tr class="border-b bg-gray-50"><td>4</td><td>${w4_exam}</td><td>${w4_homework}</td><td>${w4_tesmie3}</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <p class="mt-4 font-semibold">الامتحان الشامل: <span class="text-indigo-700">${finalExam}/20</span></p>
-        <p class="mt-2 font-bold text-green-600">النسبة النهائية: ${percent}%</p>
+        <p class="mt-2 font-bold ${percentClass}">النسبة النهائية: ${percent}%</p>
       `;
     }
 
@@ -126,7 +150,7 @@
       container.innerHTML = videos.map(v => `
         <div class="bg-white shadow rounded-lg p-3 border hover:bg-indigo-50 transition">
           <p class="font-semibold text-indigo-700">${v.title}</p>
-          <p class="text-sm text-gray-600">${v.note}</p>
+          <p class="text-sm text-gray-600">${v.note || ""}</p>
           <a href="${v.link}" target="_blank" class="text-blue-600 underline">مشاهدة</a>
         </div>
       `).join("");
@@ -137,7 +161,7 @@
       const contacts = await fetchCSV(SHEET_CONTACTS);
       const container = document.getElementById("contacts");
       container.innerHTML = contacts.map(c => {
-        let link = c.type === "whatsapp" ? `https://wa.me/${c.number}` : `tel:${c.number}`;
+        let link = (c.type === "whatsapp") ? `https://wa.me/${c.number}` : `tel:${c.number}`;
         return `
           <div class="bg-white shadow rounded-lg p-3 border hover:bg-green-50 transition">
             <p class="font-semibold">${c.label}</p>
