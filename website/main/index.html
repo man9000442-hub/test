@@ -1,4 +1,6 @@
 
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -473,8 +475,19 @@
         videosData = videos;
         const classes = [...new Set(videos.map(v => v.class).filter(v => v))];
         const select = document.getElementById("videoClassSelect");
-        select.innerHTML = `<option value="">جميع الصفوف</option>` +
-                          classes.map(c => `<option value="${c}">${c}</option>`).join("");
+        // Populate select with actual classes only (no "جميع الصفوف")
+        if (classes.length === 0) {
+          select.innerHTML = `<option value="">لا توجد صفوف</option>`;
+          select.disabled = true;
+        } else {
+          select.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join("");
+          // default to first class so videos show immediately for a specific grade
+          select.value = classes[0];
+          select.disabled = false;
+        }
+        // ensure change event triggers filtering
+        select.removeEventListener('change', filterVideosByClass);
+        select.addEventListener('change', filterVideosByClass);
         filterVideosByClass();
       } catch (error) {
         console.error("Error loading videos:", error);
@@ -680,8 +693,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
