@@ -229,7 +229,7 @@
 
   <script>
     const QUESTIONS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbySB5mw97Y81HtgQ77HDXPuH1r6kyoeN3Vp0n369HzsyiOdFuqILKG44c_dB-BhJBU6Lw/exec";
-    const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5TgUxn932J6yCLXzF9JspnLey6IWtWd5qPndy5K9gjJxmwGU38pMsD5kMt20pnMF9Jw/exec";
+    const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8fYcLjMpDy0n48xpPy-wB-DZm1oLIsqNSx7bw2Bm6cKtZLyzp8kyezOvZ1sV_rkc/exec";
 
     let selectedGrade = "";
     let studentCode = "";
@@ -521,9 +521,32 @@
       document.getElementById('studentCode').value = "";
       document.getElementById('studentGrade').value = "";
     }
+    async function submitResult(studentCode, grade, score) {
+  const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbz8fYcLjMpDy0n48xpPy-wB-DZm1oLIsqNSx7bw2Bm6cKtZLyzp8kyezOvZ1sV_rkc/exec"; // حط لينك السكربت الجديد هنا
+
+  try {
+    const res = await fetch(SUBMIT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: studentCode, grade: grade, score: score })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert(`تم حفظ نتيجتك بنجاح للأسبوع ${data.week} ✅`);
+    } else {
+      alert("لم يتم العثور على الكود الخاص بك ❌");
+    }
+  } catch (err) {
+    alert("حدث خطأ أثناء حفظ النتيجة ❌");
+    console.error(err);
+  }
+}
+
   </script>
 </body>
 </html>
+
 
 
 
