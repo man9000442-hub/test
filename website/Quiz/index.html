@@ -227,8 +227,8 @@
   </footer>
 
   <script>
-    const QUESTIONS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbySB5mw97Y81HtgQ77HDXPuH1r6kyoeN3Vp0n369HzsyiOdFuqILKG44c_dB-BhJBU6Lw/exec";
-    const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQruOAdWg1k81VUeQ3Hbys5o9r5txl6WjJv0myy1b1RtZU-zAswF9qZHC7KDo0DtDRwQ/exec";
+    const QUESTIONS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1KMTKKa7SKvB31EWeYwZkayc06V7rVAjj-JiXGfgW-RrPhbiIc1GhVxOioEETRXRnWw/exec";
+    const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznmzclw3sCQ6md-i11hR1ZLHnGrBYNqN5k0Nj70bsOB4RxhNGGygIul9h8Fd-dfSH-rw/exec";
 
     let selectedGrade = "";
     let studentCode = "";
@@ -509,7 +509,7 @@
       document.getElementById('studentGrade').value = "";
     }
 async function submitResult(studentCode, grade, score) {
-  const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbyQruOAdWg1k81VUeQ3Hbys5o9r5txl6WjJv0myy1b1RtZU-zAswF9qZHC7KDo0DtDRwQ/exec";
+  const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbznmzclw3sCQ6md-i11hR1ZLHnGrBYNqN5k0Nj70bsOB4RxhNGGygIul9h8Fd-dfSH-rw/exec";
 
   try {
     console.log("Sending result:", { code: studentCode, grade: grade, score: score }); // ✅ للتأكد أن البيانات بتتبعت
@@ -546,6 +546,7 @@ async function submitResult(studentCode, grade, score) {
   </script>
 </body>
 </html>
+
 
 
 
