@@ -227,7 +227,7 @@
   </footer>
 
   <script>
-    const QUESTIONS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5veEd_IPjBkd_os5xtbJvU__QqomWF6fZPNE5f69ny9jeh4sY3uOHhqi6x1Dq2LQwjw/exec";
+    const QUESTIONS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1S53zP_oCSLbH7Rrzgj2rZlEkphYAH8T-3R0vAukeVxcEAYDlmwWxePrvTZrkG0D89g/exec";
     const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznmzclw3sCQ6md-i11hR1ZLHnGrBYNqN5k0Nj70bsOB4RxhNGGygIul9h8Fd-dfSH-rw/exec";
 
     let selectedGrade = "";
@@ -253,34 +253,51 @@
       await loadQuestions();
     }
 
-    async function loadQuestions() {
-      try {
-        const res = await fetch(`${QUESTIONS_SCRIPT_URL}?grade=${selectedGrade}`);
-        const data = await res.json();
+function loadQuestions() {
+  try {
+    // مسح أي استدعاء قديم
+    const oldScript = document.getElementById('jsonpScript');
+    if (oldScript) oldScript.remove();
 
-        if (!data.questions || data.questions.length === 0) {
-          throw new Error("No questions found");
-        }
-
-        currentQuestions = data.questions;
-        showQuestions();
-      } catch (err) {
-        document.getElementById('loadingState').classList.add('hidden');
-        document.getElementById('quizContainer').innerHTML = `
-          <div class="card p-6 text-center">
-            <div class="text-red-500 mb-4">
-              <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">حدث خطأ</h3>
-            <p class="text-gray-600">تعذر تحميل الأسئلة. حاول مرة أخرى لاحقًا.</p>
-            <button onclick="location.reload()" class="mt-6 btn btn-primary py-2 px-4">إعادة المحاولة</button>
-          </div>
-        `;
-        document.getElementById('quizContainer').classList.remove('hidden');
+    // اسم الدالة اللي هتستقبل الرد
+    window.handleQuestionsResponse = function(data) {
+      if (!data || data.error) {
+        showError("تعذر تحميل الأسئلة. حاول مرة أخرى لاحقًا.");
+        return;
       }
-    }
+
+      currentQuestions = data.questions;
+      showQuestions();
+    };
+
+    // إنشاء السكربت اللي هيجيب البيانات
+    const script = document.createElement("script");
+    script.id = "jsonpScript";
+    script.src = `${QUESTIONS_SCRIPT_URL}?grade=${selectedGrade}&callback=handleQuestionsResponse`;
+    document.body.appendChild(script);
+
+  } catch (err) {
+    showError("حدث خطأ غير متوقع. حاول مرة أخرى.");
+  }
+}
+
+// دالة عرض رسالة الخطأ (نفس اللي عندك)
+function showError(message) {
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('quizContainer').innerHTML = `
+    <div class="card p-6 text-center">
+      <div class="text-red-500 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">حدث خطأ</h3>
+      <p class="text-gray-600">${message}</p>
+      <button onclick="location.reload()" class="mt-6 btn btn-primary py-2 px-4">إعادة المحاولة</button>
+    </div>
+  `;
+  document.getElementById('quizContainer').classList.remove('hidden');
+}
 
     function showQuestions() {
       document.getElementById('loadingState').classList.add('hidden');
@@ -546,6 +563,7 @@ async function submitResult(studentCode, grade, score) {
   </script>
 </body>
 </html>
+
 
 
 
