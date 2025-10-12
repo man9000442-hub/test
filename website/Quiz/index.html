@@ -228,7 +228,7 @@
 
   <script>
     const QUESTIONS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1S53zP_oCSLbH7Rrzgj2rZlEkphYAH8T-3R0vAukeVxcEAYDlmwWxePrvTZrkG0D89g/exec";
-    const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznmzclw3sCQ6md-i11hR1ZLHnGrBYNqN5k0Nj70bsOB4RxhNGGygIul9h8Fd-dfSH-rw/exec";
+    const RESULTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-muSasFN9_zWJ4GyScfJZ4qrMnCZNtVBCmc9bK7Lf4DAbXj3KeTn7Bp057KUOCgPpNw/exec";
 
     let selectedGrade = "";
     let studentCode = "";
@@ -525,44 +525,40 @@ function showError(message) {
       document.getElementById('studentCode').value = "";
       document.getElementById('studentGrade').value = "";
     }
-async function submitResult(studentCode, grade, score) {
-  const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbznmzclw3sCQ6md-i11hR1ZLHnGrBYNqN5k0Nj70bsOB4RxhNGGygIul9h8Fd-dfSH-rw/exec";
+function submitResult(studentCode, grade, score) {
+  const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbz-muSasFN9_zWJ4GyScfJZ4qrMnCZNtVBCmc9bK7Lf4DAbXj3KeTn7Bp057KUOCgPpNw/exec";
 
-  try {
-    console.log("Sending result:", { code: studentCode, grade: grade, score: score }); // ✅ للتأكد أن البيانات بتتبعت
+  // حذف أي سكريبت قديم
+  const oldScript = document.getElementById("jsonpSubmit");
+  if (oldScript) oldScript.remove();
 
-    const res = await fetch(SUBMIT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        code: studentCode.trim(),
-        grade: grade.trim(),
-        score: Number(score)
-      })
-    });
+  // إنشاء سكريبت جديد لإرسال البيانات
+  const script = document.createElement("script");
+  script.id = "jsonpSubmit";
+  script.src = `${SUBMIT_URL}?callback=handleResultResponse&code=${encodeURIComponent(studentCode)}&grade=${encodeURIComponent(grade)}&score=${encodeURIComponent(score)}`;
+  document.body.appendChild(script);
+}
 
-    const data = await res.json();
-    console.log("Response:", data); // ✅ نشوف الرد من السيرفر
+// ✅ دالة استقبال الرد من Google Script
+function handleResultResponse(data) {
+  console.log("Response from server:", data);
 
-    if (data.success) {
-      alert(`تم حفظ نتيجتك بنجاح للأسبوع ${data.week} ✅`);
-    } else if (data.message === "student_not_found") {
-      alert("لم يتم العثور على الكود الخاص بك ❌");
-    } else {
-      alert("حدث خطأ أثناء حفظ النتيجة ❌");
-      console.error("Error response:", data);
-    }
-  } catch (err) {
-    alert("حدث خطأ أثناء حفظ النتيجة ❌");
-    console.error("Fetch error:", err);
+  if (data.success) {
+    alert(`✅ تم حفظ نتيجتك بنجاح للأسبوع ${data.week}`);
+  } else if (data.error === "student_not_found") {
+    alert("❌ لم يتم العثور على الكود الخاص بك");
+  } else if (data.error === "missing_parameters") {
+    alert("⚠️ حدث خطأ: بيانات ناقصة");
+  } else {
+    alert("❌ حدث خطأ أثناء حفظ النتيجة");
+    console.error("Server error:", data);
   }
 }
 
   </script>
 </body>
 </html>
+
 
 
 
