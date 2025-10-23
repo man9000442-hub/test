@@ -1,8 +1,5 @@
-
-
-
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
+      /* Light mode variables */
       --primary: #4f46e5;
       --primary-dark: #4338ca;
       --primary-light: #818cf8;
@@ -26,22 +24,34 @@
       --danger: #ef4444;
       --warning: #f59e0b;
       --success: #10b981;
-      --radius-sm: 0.375rem;
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --bg-main: linear-gradient(135deg, #f0f2f5 0%, #e2e8f0 100%);
+      --bg-card: white;
+    }
+
+    /* Dark mode variables */
+    .dark {
+      --primary: #818cf8;
+      --primary-dark: #6366f1;
+      --primary-light: #a5b4fc;
+      --secondary: #34d399;
+      --neutral: #1f2937;
+      --neutral-dark: #111827;
+      --text: #f9fafb;
+      --text-light: #9ca3af;
+      --border: #374151;
+      --bg-main: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      --bg-card: #1f2937;
     }
 
     body {
       font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #f0f2f5 0%, #e2e8f0 100%);
+      background: var(--bg-main);
       min-height: 100vh;
+      color: var(--text);
     }
 
     .card {
-      background: white;
+      background: var(--bg-card);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
       transition: all 0.2s ease;
@@ -77,6 +87,33 @@
       backdrop-filter: blur(4px);
     }
 
+    /* Add theme toggle button styles */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      padding: 0.5rem;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-toggle svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: var(--text);
+    }
+
     @media (prefers-reduced-motion: reduce) {
       * {
         animation-duration: 0.01ms !important;
@@ -86,6 +123,20 @@
   </style>
 </head>
 <body class="py-8 px-4 sm:px-6 lg:px-8">
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" onclick="toggleTheme()" title="تبديل المظهر">
+    <svg class="sun hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+      </path>
+    </svg>
+    <svg class="moon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+      </path>
+    </svg>
+  </button>
+
   <!-- Header -->
   <header class="max-w-md mx-auto mb-8 text-center animate__animated animate__fadeInDown">
     <div class="card p-6">
@@ -453,7 +504,6 @@
               <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
               </div>
               <div class="ml-3">
                 <p class="text-sm font-medium text-red-800">حدث خطأ أثناء جلب بيانات الطالب</p>
@@ -669,10 +719,40 @@
       }
     }
 
-    function closeContactsModal() {
-      document.getElementById("contactsModal").classList.add("hidden");
-      document.body.style.overflow = "";
+    // Add this at the beginning of your script section
+    function toggleTheme() {
+      const html = document.documentElement;
+      const sunIcon = document.querySelector('.sun');
+      const moonIcon = document.querySelector('.moon');
+
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+        localStorage.setItem('theme', 'dark');
+      }
     }
+
+    // Check for saved theme preference
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      const sunIcon = document.querySelector('.sun');
+      const moonIcon = document.querySelector('.moon');
+
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+    });
 
     // Close modals when clicking outside
     document.getElementById("videosModal").addEventListener("click", function(e) {
@@ -693,4 +773,3 @@
   </script>
 </body>
 </html>
-
